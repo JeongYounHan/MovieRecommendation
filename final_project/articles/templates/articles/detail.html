@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+{% block body %}
+
+<div class="articlebox">
+	<!--게시판으로 돌아가기-->
+	<a href="{% url 'articles:index' %}"><p  class="text-left"><< 자유게시판</p></a>
+	<hr>
+	<!--게시판 글--->
+	<h3 class="text-left">{{ article.title }}</h3>
+  <div class="text-left">
+		<div class="article_box">
+	    <div class="article_info">
+				<img src="{% static "images/user.png" %}">
+				<a href="{% url 'accounts:profile' article.user.username %}"><span>{{ article.user }}<span></a>
+    		<div class="text-right">
+	    		<span>{{ article.created_at }}</span>
+				</div>
+			</div>
+
+			<!--게시글 수정, 삭제-->
+			{% if request.user == article.user or request.user.username == 'admin' %}
+		    <div class="d-flex justify-content-end mt-3">
+					<form action="{% url 'articles:article_delete' article.pk %}" method="POST">
+		    		{% csrf_token %}
+		    			<button style="border: none;background-color: white;"><i class="far fa-trash-alt" onclick="return confirm('정말 삭제하시겠습니까?')" style="font-size:20px; color:red;"></i></button>
+					</form>
+					<form action="{% url 'articles:article_update' article.pk %}" method="POST">
+		    		{% csrf_token %}
+		    			<button style="border: none;background-color: white;"><i class="far fa-edit" style="font-size:20px; color:blue;"></i></button>
+					</form>
+				</div>
+			{% endif %}
+			<hr>
+
+			<!--게시글 내용-->
+			<div class="article_content mb-5">
+				{{ article.content }}
+			</div>
+    </div>
+  </div>
+
+	<!--게시글 좋아요 누르기-->
+	<div class="text-left">
+		{% if user in article.article_like_users.all %}
+      <span style="cursor:pointer"><i class="fas fa-heart fa-lg like-button"  style="color:crimson cursor:pointer" data-id="{{ article.pk }}"></i></span>
+    {% else %}
+      <span style="cursor:pointer"><i class="fas fa-heart fa-lg like-button" style="color:black cursor:pointer" data-id="{{ article.pk }}"></i></span>
+	  {% endif %}
+    <small id="like-count-{{article.pk}}">{{ article.article_like_users.count }} 명이 이 글을 좋아합니다.</small>
+	</div>
+
+	<hr style="height: 15px">
+
+	<!--댓글 목록-->
+	<h5 class="text-left">댓글 목록</h5>
+	<!--댓글 있을 때-->
+	{% if comments %}
+  <div class="pl-4 pr-4">
+  	{% for comment in comments %}
+			<div class="comment_box text-left">
+			  <img src="{% static "images/user.png" %}">
+    		<span>{{ comment.user }}</span>
+	      <span class="pl-5 ml-3">{{ comment.content }}</span>
+	      <footer class="blockquote-footer text-right">작성시간: <cite title="Source Title">{{ comment.created_at }}</cite></footer>
+	      <footer class="blockquote-footer text-right">수정시간: <cite title="Source Title">{{ comment.updated_at }}</cite></footer>
+			</div>
+
+			<!--수정, 삭제: 관리자이거나 글 작성자일때-->
+	    {% if request.user == comment.user or request.user.username == 'admin' %}
+		    <div class="d-flex justify-content-end mt-3">
+		    	<form action="{% url 'articles:comments_delete' article.pk comment.pk %}" method="POST">
+	        	{% csrf_token %}
+	        	<button style="border: none;background-color: white;"><i class="far fa-trash-alt" style="font-size:15px; color:red;"  onclick="return confirm('정말 삭제하시겠습니까?')"></i></button>
+		    	</form>
+
+		    	<form action="{% url 'articles:comments_update' article.pk comment.pk %}" method="POST">
+	        	{% csrf_token %}
+	        	<button style="border: none; background-color: white;"><i class="far fa-edit" style="font-size:15px; color:blue;"></i></button>
+		    	</form>
+		    </div>
+				<hr>
+	  	{% endif %}
+		{% endfor %}
+
+	<!--댓글 없을 때-->
+  {% else %}
+		<small style="color: gray;">댓글을 등록해주세요 :) </small>
+	{% endif %}
+
+	<!--댓글 쓰기-->
+	<form class="mt-3" action="{% url 'articles:comments_create' article.pk %}" class="text-right" method="POST">
+		{% csrf_token %}
+		{% bootstrap_form comment_form %}
+		<div class="d-flex justify-content-end mt-3">
+			<input type="submit" value="댓글등록" class="btn btn mb-3" style="background-color: #db8d85; color: white; padding:4px;">
+		</div>
+	</form>
+
+</div>
+
+<script>
+  const likeButtonList = document.querySelectorAll('.like-button')
+
+  likeButtonList.forEach((likeButton) => { // callback
+    likeButton.addEventListener('click', function(event) { // 첫번째 인자 항상 event
+      const articleId = event.target.dataset.id
+
+      {% if user.is_authenticated %}
+
+      axios.get(`/articles/${articleId}/like/`)
+        .then(response => {
+          if (response.data.liked) {
+            // 활성화
+            event.target.style.color = 'crimson'
+          } else {
+            // 취소
+            event.target.style.color = 'black'
+          }
+
+          // 좋아요 수 바꾸기
+          const likeCount = document.querySelector(`#like-count-${articleId}`)
+          likeCount.innerText = response.data.count
+
+        })
+        .catch(err => console.log(err))
+      {% else %}
+        alert('로그인 해주세요')
+      {% endif %}
+
+    })
+  })
+
+</script>
+{% endblock %}

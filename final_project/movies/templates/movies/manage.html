@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block body %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>영화 관리</h2></li>
+  </ol>
+</nav>
+  <hr>
+  <div class="text-right mb-3">
+    <h4>영화 제목으로 검색</h4>
+    	<form action="{% url 'movies:adm_search' %}" method="get">
+    	  <input type="text" name="q" value="{{ q }}" id="search_bar">
+    	  <input type="submit" value="검색" id="search_button">
+    	</form>
+  </div>
+  <div class="text-right ">
+    <a class="d-inline btn btn-primary text-white" href="{% url 'movies:movie_create' %}">영화 등록</a>
+  </div>
+	{% for movie in posts %}
+  <div class="media">
+    <img  src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" style="width:140px;"  class="mr-3" >
+    <div class="media-body">
+      <h3 class="mt-2 text-left"><a href="{% url 'movies:movie_detail' movie.pk %}">{{ movie.title }}</a></h3>
+      <hr>
+      <div class="mt-2">{{ movie.overview }}</div>
+    </div>
+  </div>
+  <hr>
+	{% endfor %}
+
+  <span>페이지: {{posts.number}}</span>
+  <span>/</span>
+  <span>{{posts.paginator.num_pages}}</span>
+  <br>
+
+
+  <nav aria-label="row Page navigation example ">
+    <ul class="pagination justify-content-center mt-3">
+      {% if posts.number == 1 %}
+      <li class="page-item"><a class="page-link" href="?page={{posts.next_page_number}}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{posts.paginator.num_pages}}">Last Page</a></li>
+      {% elif posts.number == posts.paginator.num_pages %}
+      <li class="page-item"><a class="page-link" href="?page=1">First Page</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{posts.previous_page_number}}">Previous</a></li>
+      {% else %}
+      <li class="page-item"><a class="page-link" href="?page=1">First Page</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{posts.previous_page_number}}">Previous</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{posts.next_page_number}}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="?page={{posts.paginator.num_pages}}">Last Page</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+{% endblock %}

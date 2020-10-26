@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block body %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>{{ request.user.username }} 님이 좋은 평가를 내린 영화 </h2></li>
+  </ol>
+</nav>
+
+  <div class="row">
+    {% for rating in person_ratings %}
+      <div class="card col-6 col-lg-3 mt-5 p-2" style="width: 18rem;">
+        <img class="card-img-top"  src="https://image.tmdb.org/t/p/w500/{{ rating.movie.poster_path }}" alt="Card image cap" style="height:320px;">
+        <div class="card-body">
+          <h5 class="card-title">{{ rating.movie.title }}</h5>
+          <p class="card-text">내가 준 점수: {{ rating.ratings }}</p>
+          <p class="card-text">장르:
+            {% for genre in rating.movie.genres.all %}
+              {{ genre.name }}
+            {% endfor %}
+          </p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <hr>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>내가 좋아하는 장르 TOP3</h2></li>
+  </ol>
+</nav>
+
+
+  {% for genre in genres_rank %}
+    <p>{{ genre.name }}</p>
+  {% endfor %}
+<hr>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page">  <h2>추천 영화</h2></li>
+  </ol>
+</nav>
+
+
+
+<div class="row">
+{% if recommendations %}
+  {% for recommendation in recommendations %}
+    <div class="card col-6 col-lg-3 p-2" style="width: 18rem;">
+      <img class="card-img-top"  src="https://image.tmdb.org/t/p/w500/{{ recommendation.poster_path }}" alt="Card image cap" style="height:320px;">
+      <div class="card-body">
+        <h5 class="card-title">{{ recommendation.title }}</h5>
+        <p class="card-text">장르:
+          {% for genre in recommendation.genres.all %}
+            {{ genre.name }}
+          {% endfor %}
+        </p>
+        <!--상세보기 클릭-->
+        <div class="card-footer bg-white border-top-0">
+          <a href="{% url 'movies:detail' recommendation.pk %} " class="text-decoration-none">
+            리뷰 보기
+            <img src="{% static "images/zoomin.png" %}" style="height:30px;">
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="col-12">
+    <p class="mt-5">아직 영화를 추천할 수 없습니다</p>
+  </div>
+{% endif %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,139 @@
+<div class="wrapper">
+  <nav id="sidebar">
+    <div class="sidebar-header">
+      <a class="navbar-brand" href="/">TRUE BASIC</a>
+    </div>
+    <ul class="list-unstyled components">
+      {% if user.is_authenticated %}
+        <p>{{ request.user.username }}님, 어서오세요</p>
+        <li>
+          <a href="{% url 'accounts:logout' %}">로그아웃</a>
+        </li>
+
+        {% if request.user.username == 'admin' %}
+          <li>
+            <a href="{% url 'articles:index' %}">게시물관리</a>
+          </li>
+          <li>
+            <a href="{% url 'movies:manage' %}">영화관리</a>
+          </li>
+
+        {% else %}
+          <li>
+            <a href="{% url 'movies:index' %}">평점남기기</a>
+          </li>
+          <li>
+            <a href="{% url 'articles:index' %}">자유게시판</a>
+          </li>
+          <li>
+            <a  href="{% url 'accounts:profile' request.user.username %}">PROFILE</a>
+          </li>
+      {% endif %}
+    </ul>
+    {% else %}
+    <ul class="list-unstyled CTAs">
+      <li>
+        <a class="text-decoration-none"  href="{% url 'accounts:signup' %}" class="download">회원가입</a>
+      </li>
+      <li>
+        <a class="text-decoration-none"  href="{% url 'accounts:login' %}" class="article">로그인</a>
+      </li>
+    </ul>
+    {% endif %}
+  </nav>
+
+<div id="content">
+  <button type="button" id="sidebarCollapse" class="navbar-btn">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+<div>
+</div>
+
+<style>
+#sidebarCollapse {
+    width: 40px;
+    height: 40px;
+    background: #f5f5f5;
+}
+
+#sidebarCollapse span {
+    width: 80%;
+    height: 2px;
+    margin: 0 auto;
+    display: block;
+    background: #555;
+    transition: all 0.8s cubic-bezier(0.810, -0.330, 0.345, 1.375);
+}
+#sidebarCollapse span:first-of-type {
+    /* rotate first one */
+    transform: rotate(45deg) translate(2px, 2px);
+}
+#sidebarCollapse span:nth-of-type(2) {
+    opacity: 0;
+}
+#sidebarCollapse span:last-of-type {
+    transform: rotate(-45deg) translate(1px, -1px);
+}
+#sidebarCollapse.active span {
+    /* no rotation */
+    transform: none;
+    /* all bars are visible */
+    opacity: 1;
+    margin: 5px auto;
+}
+
+/*투명도 주기*/
+/*#sidebar:after{*/
+/*    opacity: 0.2!important; filter:alpha(opacity=20);*/
+/*}*/
+
+
+#sidebar.active {
+    margin-left: -250px;
+    transform: rotateY(100deg);
+}
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+        transform: rotateY(100deg);
+    }
+    #sidebar.active {
+        margin-left: 0;
+        transform: none;
+    }
+
+    #sidebarCollapse span:first-of-type,
+    #sidebarCollapse span:nth-of-type(2),
+    #sidebarCollapse span:last-of-type {
+        transform: none;
+        opacity: 1;
+        margin: 5px auto;
+    }
+
+
+    #sidebarCollapse.active span {
+        margin: 0 auto;
+    }
+    #sidebarCollapse.active span:first-of-type {
+        transform: rotate(45deg) translate(2px, 2px);
+    }
+    #sidebarCollapse.active span:nth-of-type(2) {
+        opacity: 0;
+    }
+    #sidebarCollapse.active span:last-of-type {
+        transform: rotate(-45deg) translate(1px, -1px);
+    }
+}
+</style>
+
+<script>
+$(document).ready(function () {
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+        $(this).toggleClass('active');
+    });
+});
+</script>
+

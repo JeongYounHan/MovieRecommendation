@@ -1,0 +1,36 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'stylesheets/style.css' %}">
+    <link rel="stylesheet" href="{% static 'stylesheets/main.css' %}">
+    {% block css %}
+    {% endblock %}
+    {% load bootstrap4 %}
+    {% bootstrap_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.4/pagination.min.js"></script>
+    <script src="https://kit.fontawesome.com/e1b03f9f64.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<body>
+    <div class="wrapper">
+    {% include '_nav.html' %}
+    <div class="container text-center" id="content">
+
+        {% block body %}
+        {% endblock %}
+    </div>
+    </div>
+
+{% bootstrap_javascript jquery='full' %}
+</body>
+</html>

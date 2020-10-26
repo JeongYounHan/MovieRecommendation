@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block body %}
+<link href="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.css" rel="stylesheet">
+
+<script src="https://unpkg.com/tableexport.jquery.plugin/tableExport.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/bootstrap-table-locale-all.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.16.0/dist/extensions/export/bootstrap-table-export.min.js"></script>
+
+<!--관리자 기능-->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+  {% if request.user.username == 'admin'%}
+     <li class="breadcrumb-item active" aria-current="page"><h2>관리자 페이지</h2></li>
+   </ol>
+</nav>
+    <div class="text-right mb-3"><small>회원 게시물 관리 </small>
+  {% else %}
+  	<li class="breadcrumb-item active" aria-current="page"><h2>자유게시판</h2></li>
+	   </ol>
+</nav>
+  	<div class="text-right"><small>의견을 자유롭게 남겨주세요.</small>
+  {% endif %}
+
+
+  <!--div 연장-->
+  <hr style="border: 0;
+            height: 1px;
+            background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+            background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+            background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+            background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);">
+
+  <!--검색기능-->
+  <h5 style="color: gray;">영화 제목으로 검색하기</h5>
+  <form action="{% url 'articles:search' %}" method="get">
+    <input type="text" name="q" value="{{ q }}" id="search_bar">
+    <input type="submit" value="검색" id="search_button">
+  </form>
+
+  <!--글쓰기버튼-->
+  <a href="{% url 'articles:create' %}" class="btn mt-5" style="background-color: #db8d85; color: white; padding: 4px;">
+  	<svg class="bi bi-pencil" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+  		<path fill-rule="evenodd" d="M11.293 1.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-9 9a1 1 0 0 1-.39.242l-3 1a1 1 0 0 1-1.266-1.265l1-3a1 1 0 0 1 .242-.391l9-9zM12 2l2 2-9 9-3 1 1-3 9-9z"/>
+  		<path fill-rule="evenodd" d="M12.146 6.354l-2.5-2.5.708-.708 2.5 2.5-.707.708zM3 10v.5a.5.5 0 0 0 .5.5H4v.5a.5.5 0 0 0 .5.5H5v.5a.5.5 0 0 0 .5.5H6v-1.5a.5.5 0 0 0-.5-.5H5v-.5a.5.5 0 0 0-.5-.5H3z"/>
+  	</svg> 글쓰기
+  </a>
+</div>
+
+<!--게시판-->
+<div class="row like_article mt-0">
+  <table class="table table-hover ml-auto mr-auto" >
+    <thead class="table_head">
+      <tr class="">
+        <th class="">글번호</th>
+        <th class="">영화제목</th>
+        <th class="">글제목</th>
+        <th class="">글쓴이</th>
+        <th class="">작성시간</th>
+        <th>좋아요</th>
+      </tr>
+    </thead>
+    {% for article in articles %}
+      <tbody>
+        <tr>
+      	  <td>
+				  	{% if request.user.username == 'admin' %}
+				  		<input type="checkbox" name="{{ article.pk }}">
+						{% endif %}
+						{{ article.pk }}
+					</td>
+          <td style="color: gray;">{{ article.movie }}</td>
+          <td><a href="{% url 'articles:detail' article.pk %}"> {{ article.title }}  <span class="badge badge-secondary"></span></a></td>
+          <td>
+          	<a href="{% url 'accounts:profile' article.user.username %}">
+			  		{{ article.user }}
+			    </a>
+  			  </td>
+          <td>{{ article.created_at  }}</td>
+          <td>
+          {% if user in article.article_like_users.all %}
+			      <span style="cursor:pointer"><i class="fas fa-heart fa-lg like-button "  style="color:crimson" data-id="{{ article.pk }}"></i></span>
+				  {% else %}
+			      <span style="cursor:pointer"><i class="fas fa-heart fa-lg like-button" style="color:black" data-id="{{ article.pk }}"></i></span>
+				  {% endif %}
+				    <span id="like-count-{{article.pk}}">{{ article.article_like_users.count }}</span>
+    			</td>
+        </tr>
+		  </tbody>
+    {% endfor %}
+  </table>
+</div>
+
+<script>
+  const likeButtonList = document.querySelectorAll('.like-button')
+
+  likeButtonList.forEach((likeButton) => { // callback
+    likeButton.addEventListener('click', function(event) { // 첫번째 인자 항상 event
+      const articleId = event.target.dataset.id
+
+      {% if user.is_authenticated %}
+
+      axios.get(`/articles/${articleId}/like/`)
+        .then(response => {
+          if (response.data.liked) {
+            // 활성화
+            event.target.style.color = 'crimson'
+          } else {
+            // 취소
+            event.target.style.color = 'black'
+          }
+
+          // 좋아요 수 바꾸기
+          const likeCount = document.querySelector(`#like-count-${articleId}`)
+          likeCount.innerText = response.data.count
+
+        })
+        .catch(err => console.log(err))
+      {% else %}
+        alert('로그인 해주세요')
+      {% endif %}
+
+    })
+  })
+
+
+</script>
+
+
+{% endblock %}

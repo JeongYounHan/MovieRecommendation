@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block body %}
+
+<!--윗부분-->
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>REVIEW</h2></li>
+  </ol>
+</nav>
+
+
+<hr style="border: 0;
+      height: 1px;
+      background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+      background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+      background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+      background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);">
+
+<!--관리자-->
+{% if request.user.username == 'admin' %}
+<div class="d-flex justify-content-end mr-5 mt-2 pr-5 mb-4">
+	<form action="{% url 'movies:movie_delete' movie.pk %}" method="POST" id="delete" onclick="return confirm('정말 삭제하시겠습니까?')">
+		{% csrf_token %}
+		<input type="submit" value="영화삭제">
+	</form>
+	<form action="{% url 'movies:movie_update' movie.pk %}" method="POST">
+		{% csrf_token %}
+		<input type="submit" value="영화수정">
+	</form>
+</div>
+{% endif %}
+
+<!--영화 설명-->
+<div class="row align-items-center justify-content-center">
+	<div class="col-6 pr-0">
+		<h4 class="movie_title" id="movietitle">{{ movie.title }}</h4>
+		<hr>
+		<div class="mt-4">
+			<h5 class="text-left ml-2">줄거리</h5>
+			<hr width="52px" align="left" style="border: solid 2px gray;" class="ml-2 mt-1">
+			"{{ movie.overview }}"
+		</div>
+	</div>
+	<!--포스터, 예고편-->
+	<div class="col-6">
+		<img class="w-auto" style="height:400px;" src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" alt="image2">
+		<div class="mt-3">
+			<a data-toggle="modal" data-target="#exampleModal" id="modalButton" class="btn" style="background-color: #db8d85; color:white; cursor: pointer;">
+			예고편 보기
+			</a>
+		</div>
+	</div>
+</div>
+<hr>
+
+<!-- Modal -->
+<div>
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">예고편 보기</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<iframe id="iframe" width="400" height="315" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn" style="background-color: #db8d85; color:white;" data-dismiss="modal">Close</button>
+		</div>
+		</div>
+	</div>
+</div>
+
+<!--평점남긴 사람들 평균점수 계산-->
+<h5>
+	평균 점수:
+	{{ average.ratings__avg|floatformat:2 }}
+</h5>
+
+{% if average.ratings__avg > 8 %}
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+{% elif average.ratings__avg > 6 %}
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+{% elif average.ratings__avg > 4 %}
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+{% elif average.ratings__avg > 2 %}
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+{% elif average.ratings__avg > 0 %}
+  <i class="fas fa-star fa-lg"  style="color:green"></i>
+{% else %}
+  <p>아직 아무도 평가하지 않았습니다</p>
+{% endif %}
+<br>
+<br>
+<div class="text-right">
+<a href="{% url 'movies:index' %}" class="btn btn-secondary text-white">뒤로가기</a>
+</div>
+<!-- 한줄평 목록-->
+{% if ratings %}
+	<h5 class="text-left ml-2">한줄평 | <small>총 {{ ratings.count }}건</small></h5>
+	<hr width="110px" align="left" style="border: solid 2px gray;" class="ml-2 mt-1">
+
+	{% for rating in ratings %}
+	<!--작성자 프로필 보기(이때 자신이 쓴 글은 들어갈수 없음)-->
+	  <div class="text-left ml-5 mr-5 mt-2 ">
+		<div class="comment_box">
+	    <div class="comment_detail">
+			<img src="https://ssl.pstatic.net/static/cafe/cafe_pc/default/cafe_profile_77.png?type=c77_77" width="55" height="55">
+	    	<span>
+  	  		<a href="{% url 'accounts:profile' rating.user.username %}" class="ml-1">{{ rating.user }}</a>
+	  		</span>
+  			<br>
+			</div>
+		<div class="article_content pl-5">
+			<p class="d-inline ml-3 ">평점  </p>
+        {% if rating.ratings > 8 %}
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+        {% elif rating.ratings > 6 %}
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+        {% elif rating.ratings > 4 %}
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+        {% elif rating.ratings > 2 %}
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+        {% else %}
+          <i class="fas fa-star fa-lg"  style="color:gray"></i>
+        {% endif %}
+			<p class="ml-3">{{ rating.content }}</p>
+			</div>
+   		 </div>
+  	</div>
+
+	<!--삭제버튼-->
+		{% if request.user == rating.user or request.user.username == 'admin' %}
+			<form action="{% url 'movies:rating_delete' movie.pk rating.pk %}" method="POST" class="text-right pr-4">
+    		{% csrf_token %}
+    		<button style="border: none;background-color: white;"><i class="far fa-trash-alt" style="font-size:20px; color:red;" onclick="return confirm('정말 삭제하시겠습니까?')" ></i></button>
+			</form>
+		{% endif %}
+			<hr>
+	{% endfor %}
+{% endif %}
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!--평점 평가 남기기-->
+<h5 class="text-left ml-2">한줄평 작성</h5>
+<hr width="96px" style="border: solid 2px gray;" align="left" class="ml-2 mt-1">
+  <div class="row justify-content-center">
+	<form action="{% url 'movies:rating_create' movie.pk request.user.username %}" method="POST" class="text-left col-11">
+		{% csrf_token %}
+		{% bootstrap_form form %}
+    {% buttons %}
+    <div class="text-center">
+      <button type="submit" class="btn"  style="background-color: #db8d85; color:white;">작성완료!</button>
+    </div>
+    {% endbuttons %}
+	</form>
+</div>
+
+
+<script>
+  const modalButton = document.querySelector('#modalButton')
+	const movieTitle = document.querySelector('#movietitle').innerText
+	const API_KEY2 = "{{API_KEY2}}"
+
+  modalButton.addEventListener('click', function(event){
+		document.getElementById('iframe').src = ''
+      axios.get(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY2}&part=id&q=${movieTitle} 예고편`)
+      	.then(function(response){
+            result = response.data.items[0].id.videoId
+            document.getElementById('iframe').src = "https://www.youtube.com/embed/"+result
+        })
+      	.catch(function(error){
+          	//handle error
+          	console.log(error);
+        })
+	})
+</script>
+
+
+
+{% endblock %}

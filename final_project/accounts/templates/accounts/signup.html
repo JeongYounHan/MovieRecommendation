@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block body %}
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>회원가입</h2></li>
+  </ol>
+</nav>
+<form action="" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    <button class="btn mb-2" style="background-color: #db8d85; color:white;">가입하기</button>
+</form>
+
+
+{% endblock %}

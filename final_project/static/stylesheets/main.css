@@ -1,0 +1,18 @@
+#search_button, #search_bar{
+
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+
+    border-top-right-radius: 5px;
+    border-bottom-right-radius:5px;
+    margin-left:3px;
+    border: 0.7px solid #a5a5a5;
+    background-color: rgba(0,0,0,0);
+
+  }
+
+#search_button {
+  background-color: #db8d85;
+  color:white;
+  border:none;
+}

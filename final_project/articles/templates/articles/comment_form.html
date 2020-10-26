@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block body %}
+	<h2>댓글 수정하기</h2>
+	<hr>
+	<form action="" method="POST">
+		{% csrf_token %}
+		{% bootstrap_form commentform %}
+        {% buttons %}
+          <button type="submit" class="btn" style="background-color: #db8d85; color:white;">댓글수정</button>
+
+          <a href="{% url 'articles:index' %}">
+            <button type="button" class="btn btn-secondary">BACK</button>
+          </a>
+        {% endbuttons %}
+	</form>
+{% endblock %}

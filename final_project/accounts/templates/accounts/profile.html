@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block body %}
+
+
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active" aria-current="page"><h2>{{ user.username }} 님의 PROFILE</h2></li>
+  </ol>
+</nav>
+
+{% if request.user != user %}
+  <div class="text-right mb-3"><small >유저의 기록들을 확인하세요.</small>
+{% else %}
+  <div class="text-right mb-3"><small >나만의 기록들을 확인하세요.</small>
+{% endif %}
+  <!--div 연장-->
+  <hr style="border: 0;
+        height: 1px;
+        background-image: -webkit-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+        background-image: -moz-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+        background-image: -ms-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);
+        background-image: -o-linear-gradient(left, #f0f0f0, #8c8b8b, #f0f0f0);">
+</div>
+
+<!--follow 기능-->
+<div class="row">
+  <!--followers-->
+  <div class="col-6">
+    <div class="card mt-3">
+      <div class="card-header">
+        <p>FOLLOWERS</p>
+      </div>
+      <div class="card-body">
+        {% if user.followers.all.count %}
+          <p> {{ user.followers.all.count }} 명</p>
+        {% else %}
+          <p>  팔로워가 없습니다. <i class="far fa-smile" style="color: red;"></i></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <!--followings-->
+  <div class="col-6">
+    <div class="card mt-3">
+      <div class="card-header">
+        <p>FOLLOWINGS</p>
+      </div>
+      <div class="card-body">
+        {% if user.followings.count %}
+          <p> {{ user.followings.count }} 명</p>
+        {% else %}
+          <p>  팔로잉이 없습니다. <i class="far fa-smile" style="color: red;"></i></p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--펄로우 누르는 부분-->
+<div class="followbox mt-3">
+  <!--자기 자신의 프로필에서는 팔로잉 기능 없음-->
+  {% if request.user != user %}
+  <a href="{% url 'accounts:follow' user.username %}" class="mt-3">
+    {% if request.user in user.followers.all %}
+      <i class="fas fa-smile-wink" style="color: green;">팔로잉 중입니다</i>
+    {% else %}
+      <i class="far fa-smile" style="color: red;">팔로우 하시려면 클릭하세요</i>
+    {% endif %}
+  </a>
+  {% endif %}
+</div>
+<hr>
+
+<!--영화추천받기 -->
+<!--본인 프로필에서만 -->
+{% if request.user == user %}
+  <div>
+    <a href="{% url 'accounts:recommend' user.username %}" class="btn mt-3 ml-3" style="font-size: 20px; color:white; background-color: #AB9C93; padding:10px 40px;">내 스타일대로 영화 추천받기</a>
+  </div>
+{% endif %}
+
+
+<!--좋아요 한 글-->
+<div class="row like_article">
+  <h4 class="text-left ml-3">{{ user.username }} 님이 좋아요 한 글</h4>
+  <table class="table table-hover ml-auto mr-auto">
+    <thead class="table_head">
+      <tr class="">
+          <th class="">글번호</th>
+          <th class="">글제목</th>
+          <th class="">글쓴이</th>
+          <th class="">작성시간</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for article in user.like_articles.all %}
+      <tr>
+        <td>{{ article.pk }}</td>
+        <td><a href="{% url 'articles:detail' article.pk %}"> {{ article.title }}</a></td>
+        <td><a href="{% url 'accounts:profile' article.user.username %}">{{ article.user  }}</td>
+        <td>{{ article.created_at  }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<hr>
+
+<!--해당 유저가 보고싶어요 누른 영화 목록-->
+<h4 class="text-left mb-4">{{ user.username }} 님이 보고싶어요 한 영화</h4>
+<div class="row">
+  {% if user.like_movies.all %}
+    {% for movie in user.like_movies.all %}
+      <div class="cardAll card col-6 col-lg-3 mb-4 p-2" >
+       <img class="card-img-top" src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" alt="Card image cap" style="height:320px;">
+        <div class="card-body">
+          <h5 class="card-title">{{ movie.title }}</h5>
+        </div>
+        <div class="card-footer bg-white border-top-0">
+          <a href="{% url 'movies:detail' movie.pk %} " class="text-decoration-none">
+            리뷰 보기
+            <img src="{% static "images/zoomin.png" %}" style="height:30px;">
+              </a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="col-12">
+      <p class="mt-5">아직 보고싶어요 한 영화가 없습니다.</p>
+    </div>
+  {% endif %}
+</div>
+
+
+
+{% endblock %}
+
+
